@@ -37,14 +37,14 @@ $(document).ready(function () {
     showlatest();
 
     //var newUploadSocket  = io.connect('http://ec2-54-242-153-20.compute-1.amazonaws.com:4000/new_upload');
-    var newUploadSocket  = io.connect('http://localhost:4000/new_upload');
+    var newUploadSocket  = io.connect('http://localhost:3000/new_upload');
 
     newUploadSocket.on('error', function (reason){
         alert('Unable to connect Socket.IO'+reason);
     });
 
     newUploadSocket.on('connect', function (){      
-        //alert(' ######### Connected ########## ');
+        alert(' ######### Connected ########## ');
     });
 
     newUploadSocket.on('update', function (data) {        
@@ -110,7 +110,7 @@ $(document).ready(function () {
                     var li = $('<li/>').appendTo(gallery_ul);
                     if(data.type == 'image') {
                         $('<a data-gallery="gallery" class="thumbnail"/>')
-                        .append($('<img style="width:220px; height:220px">').prop('src', data.path))
+                        .append($('<img style="width:220px; height:220px">').prop('src', data.thumb))
                         .prop('href', data.path)
                         .prop('title', data.name+" "+data.location+" "+data.device)
                         .appendTo(li);
