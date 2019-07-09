@@ -6,25 +6,27 @@ patch:
   SNYK-JS-LODASH-450202:
     - fluent-ffmpeg > winston > async > lodash:
         patched: '2019-07-04T02:41:54.384Z'
-    - snyk > inquirer > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
-    - snyk > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
-    - snyk > snyk-nuget-plugin > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
     - snyk > snyk-nodejs-lockfile-parser > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
+        patched: '2019-07-09T04:17:30.047Z'
     - snyk > @snyk/dep-graph > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
-    - snyk > snyk-config > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
+        patched: '2019-07-09T04:17:30.047Z'
+    - snyk > inquirer > lodash:
+        patched: '2019-07-09T04:17:30.047Z'
     - snyk > snyk-mvn-plugin > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
-    - snyk > @snyk/dep-graph > graphlib > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
+        patched: '2019-07-09T04:17:30.047Z'
+    - snyk > snyk-config > lodash:
+        patched: '2019-07-09T04:17:30.047Z'
     - snyk > snyk-nodejs-lockfile-parser > graphlib > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
+        patched: '2019-07-09T04:17:30.047Z'
     - snyk > snyk-go-plugin > graphlib > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
+        patched: '2019-07-09T04:17:30.047Z'
     - snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash:
-        patched: '2019-07-09T04:14:56.662Z'
+        patched: '2019-07-09T04:17:30.047Z'
+    - fluent-ffmpeg > winston > async > lodash:
+        patched: '2019-07-09T04:17:30.047Z'
+    - snyk > lodash:
+        patched: '2019-07-09T04:17:30.047Z'
+    - snyk > snyk-nuget-plugin > lodash:
+        patched: '2019-07-09T04:17:30.047Z'
+    - snyk > @snyk/dep-graph > graphlib > lodash:
+        patched: '2019-07-09T04:17:30.047Z'
