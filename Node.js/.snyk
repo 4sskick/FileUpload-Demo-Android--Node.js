@@ -30,3 +30,5 @@ patch:
         patched: '2019-07-09T04:17:30.047Z'
     - snyk > @snyk/dep-graph > graphlib > lodash:
         patched: '2019-07-09T04:17:30.047Z'
+    - mongoose > async > lodash:
+        patched: '2019-07-09T04:20:43.617Z'
