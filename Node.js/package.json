@@ -35,7 +35,8 @@
   "scripts": {
     "snyk-protect": "snyk protect",
     "prepublish": "npm run snyk-protect",
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "prepare": "npm run snyk-protect"
   },
   "snyk": true
 }
