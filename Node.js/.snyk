@@ -34,3 +34,8 @@ patch:
         patched: '2019-07-09T04:20:43.617Z'
     - node-thumbnail > async > lodash:
         patched: '2019-07-09T07:34:02.698Z'
+  SNYK-JS-HTTPSPROXYAGENT-469131:
+    - snyk > proxy-agent > https-proxy-agent:
+        patched: '2019-10-04T00:26:18.171Z'
+    - snyk > proxy-agent > pac-proxy-agent > https-proxy-agent:
+        patched: '2019-10-04T00:26:18.171Z'
