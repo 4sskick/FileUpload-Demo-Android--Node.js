@@ -97,112 +97,216 @@ app.post('/upload', function (req, res) {
 
   console.log(" ########## POST /uplaod ####### ");
 
-  var form = new formidable.IncomingForm(),
-    files = [],
-    fields = [];
+  const form = new formidable.IncomingForm();
+  let files = []
+    , fields = [];
 
-  var account;
-  var type;
-  var device;
-  var location;
-  var fileCreated;
+  let fileAccount
+    , fileType
+    , deviceUsed
+    , deviceLocation
+    , fileCreatedToUpload;
 
+  // Sets encoding for incoming form fields.
   form.encoding = 'utf-8';
-  form.uploadDir = __dirname + "/files";
+  // Sets the directory for placing file uploads in
+  form.uploadDir = __dirname + '/files';
+  // nclude the extensions of the original files
   form.keepExtensions = true;
 
   console.log(" ########## POST /uplaod form ####### " + form.uploadDir);
 
-  form.parse(req);
-  form
-    .on('fileBegin', function (field, file) {
-      file.path = form.uploadDir + "/" + file.name;
-      console.log("###### file begin ::: file Path" + file.path);
-    })
-    .on('progress', function (bytesReceived, bytesExpected) {
-      // console.log("###### BYTES RECEIVED EXCEPTED " /* + bytesReceived + " : " + bytesExpected */);
-    })
-    .on('field', function (field, value) {
-      // console.log('############ on Field ######### ' /* + field + " : " + value */);
-      if (field == 'name') {
-        account = value;
-      }
+  form.parse(req)
 
-      if (field == 'type') {
-        type = value;
-      }
+  form.on('progress', (bytesReceived, bytesExpected) => {
 
-      if (field == 'device') {
-        device = value;
-      }
+    console.log(`listen on progress ${bytesReceived} ${bytesExpected}`);
 
-      if (field == 'location') {
-        location = value;
-      }
+  }).on('fileBegin', (name, fileToProcessed) => {
 
-      fields.push([field, value]);
-    })
-    .on('file', function (field, file) {
-      console.log('############ on File ######### ' + field + " : " + file.path);
-      files.push([field, file]);
-      fileCreated = file;
-    })
-    .on('end', function () {
-      console.log('-> upload done');
-      console.log('############ on End ######### ' + account + " : " + type);
-      console.log('############ fileCreated ######### ' + fileCreated.path);
+    fileToProcessed.path = form.uploadDir + "/" + fileToProcessed.name;
+    console.log("###### file begin ::: file Path" + fileToProcessed.path);
+    console.log(`listen on fileBegin ${name} ${JSON.stringify(fileToProcessed)}`);
 
-      var ext = path.extname(fileCreated.path);
-      var base = path.basename(fileCreated.path, ext);
+  }).on('field', (fieldsName, fieldsValue) => {
+    /**
+     * field to be send along with object files to uploaded
+     * like:
+     * ~  key:name value:fileName.jpg
+     * ~  key:type value:image/audio/video
+     * ~  key:device  value:android/ios/web
+     * ~  key:location  value:long,lat
+     */
 
-      console.log('############ ext base ######### ' + ext + " : " + base);
+    console.log(`############ on Field ######### ${fieldsName} : ${fieldsValue}`);
+    console.log(`listen on fields: ${fieldsName} - ${fieldsValue}`);
 
-      var srcPath = __dirname + '/files/' + fileCreated.name;
-      var dstPath = __dirname + '/files/' + base + '_thumb' + ext;
+    switch (fieldsName) {
+      case 'name':
+        fileAccount = fieldsValue;
+        break
 
-      var fileUrl = '/files/' + fileCreated.name;
-      var thumbfileUrl = '/files/' + base + '_thumb' + ext;
+      case 'type':
+        fileType = fieldsValue;
+        break
 
-      if (_.indexOf(picextensions, ext) != -1) {
-        console.log('############ Image found ######### ');
-        // Create thumbnail
-        easyimg.resize({ src: srcPath, dst: dstPath, width: 150, height: 150 }, function (err, image) {
-          if (err) {
-            throw err;
-          }
-          console.log('Resized');
-          console.log(image);
-          uploadDB.addFile(account, type, device, location, thumbfileUrl, fileUrl);
-          console.log('############ Emitting on new socket ######### ');
-          new_upload_socket.emit('update', { type: "image", path: fileUrl, name: account, location: location });
-          console.log('All done!');
+      case 'device':
+        deviceUsed = fieldsValue;
+        break
 
-        });
-      } else if (_.indexOf(videoextensions, ext) != -1) {
-        dstPath = "";
-        console.log('############ Video found ######### ');
-        uploadDB.addFile(account, type, device, location, thumbfileUrl, fileUrl);
-        new_upload_socket.emit('update', { type: "video", path: fileUrl });
-      } else if (_.indexOf(audioxtensions, ext) != -1) {
-        dstPath = "";
+      case 'location':
+        deviceLocation = fieldsValue;
+        break
+    }
 
-        var dstAudioMp3Path = __dirname + '/files/' + base + '.mp3';
-        var dbAudioMp3Path = '/files/' + base + '.mp3';
-        console.log('############ Audio found ######### ' + fileUrl + " : " + dstAudioMp3Path);
-        var proc = new ffmpeg({ source: srcPath })
-          .saveToFile(dstAudioMp3Path, function (stdout, stderr) {
-            console.log('######## file has been converted succesfully #########' + stdout + " : " + stderr);
-            uploadDB.addFile(account, type, device, location, thumbfileUrl, dbAudioMp3Path);
-            new_upload_socket.emit('update', { type: "audio", path: dbAudioMp3Path });
-          });
+    fields.push([fieldsName, fieldsValue])
 
-      }
+  }).on('file', (fieldsFile, fileInProcessed) => {
 
-      res.writeHead(200, { 'content-type': 'text/plain' });
-      res.write('received fields:\n\n ' + util.inspect(fields));
-      res.write('\n\n');
-      res.end('received files:\n\n ' + util.inspect(files));
-    });
+    console.log(`############ on File ######### ${fieldsFile} : ${fileInProcessed.path}`);
+    console.log(`listen on file ${fieldsFile} ${JSON.stringify(fileInProcessed)}`)
+    files.push([fieldsFile, fileInProcessed]);
+    fileCreatedToUpload = fileInProcessed;
+
+  }).on('end', () => {
+
+    console.log(`############ on End ######### ${fileAccount} : ${fileType}`);
+    console.log('############ fileCreated ######### ' + fileCreatedToUpload.path);
+    console.log(`listen on end`);
+
+    let ext = path.extname(fileCreatedToUpload.path);
+    let base = path.basename(fileCreatedToUpload.path, ext);
+
+    console.log(`############ ext base ######### ${ext} : ${base}`);
+
+    //creating duplicate for thumbnail with resize operation
+    let srcPath = `${__dirname}/files/${fileCreatedToUpload.name}`;
+    let dstPath = `${__dirname}/files/${base}_thumb${ext}`;
+
+    let fileUrl = `/files/${fileCreatedToUpload.name}`;
+    let fileThumbUrl = `/files/${base}_thumb${ext}`;
+
+    // if(_.indexOf)
+  });
+
+  res.writeHead(200, { 'content-type': 'text/plain' });
+  res.write('received fields:\n\n ' + util.inspect(fields));
+  res.write('\n\n');
+  res.end('received files:\n\n ' + util.inspect(files));
+
+
+  // form.parse(req, function (err, fields, files) {
+  //   res.writeHead(200, { 'content-type': 'text/plain' });
+  //   res.write('receive upload:\n\n')
+  //   res.end(util.inspect({ fields: fields, files: files }));
+  // })
+
+  // var form = new formidable.IncomingForm(),
+  //   files = [],
+  //   fields = [];
+
+  // var account;
+  // var type;
+  // var device;
+  // var location;
+  // var fileCreated;
+
+  // form.encoding = 'utf-8';
+  // form.uploadDir = __dirname + "/files";
+  // form.keepExtensions = true;
+
+  // console.log(" ########## POST /uplaod form ####### " + form.uploadDir);
+
+  // form.parse(req);
+  // form
+  //   .on('fileBegin', function (field, file) {
+  //     file.path = form.uploadDir + "/" + file.name;
+  //     console.log("###### file begin ::: file Path" + file.path);
+  //   })
+  //   .on('progress', function (bytesReceived, bytesExpected) {
+  //     console.log("###### BYTES RECEIVED EXCEPTED " /* + bytesReceived + " : " + bytesExpected */);
+  //   })
+  //   .on('field', function (field, value) {
+  //     console.log('############ on Field ######### ' + field + " : " + value);
+  //     if (field == 'name') {
+  //       account = value;
+  //     }
+
+  //     if (field == 'type') {
+  //       type = value;
+  //     }
+
+  //     if (field == 'device') {
+  //       device = value;
+  //     }
+
+  //     if (field == 'location') {
+  //       location = value;
+  //     }
+
+  //     fields.push([field, value]);
+  //   })
+  //   .on('file', function (field, file) {
+  //     console.log('############ on File ######### ' + field + " : " + file.path);
+  //     files.push([field, file]);
+  //     fileCreated = file;
+  //   })
+  //   .on('end', function () {
+  //     console.log('-> upload done');
+  //     console.log('############ on End ######### ' + account + " : " + type);
+  //     console.log('############ fileCreated ######### ' + fileCreated.path);
+
+  //     var ext = path.extname(fileCreated.path);
+  //     var base = path.basename(fileCreated.path, ext);
+
+  //     console.log('############ ext base ######### ' + ext + " : " + base);
+
+  //     var srcPath = __dirname + '/files/' + fileCreated.name;
+  //     var dstPath = __dirname + '/files/' + base + '_thumb' + ext;
+
+  //     var fileUrl = '/files/' + fileCreated.name;
+  //     var thumbfileUrl = '/files/' + base + '_thumb' + ext;
+
+  //     if (_.indexOf(picextensions, ext) != -1) {
+  //       console.log('############ Image found ######### ');
+  //       // Create thumbnail
+  //       easyimg.resize({ src: srcPath, dst: dstPath, width: 150, height: 150 }, function (err, image) {
+  //         if (err) {
+  //           throw err;
+  //         }
+  //         console.log('Resized');
+  //         console.log(image);
+  //         uploadDB.addFile(account, type, device, location, thumbfileUrl, fileUrl);
+  //         console.log('############ Emitting on new socket ######### ');
+  //         new_upload_socket.emit('update', { type: "image", path: fileUrl, name: account, location: location });
+  //         console.log('All done!');
+
+  //       });
+  //     } else if (_.indexOf(videoextensions, ext) != -1) {
+  //       dstPath = "";
+  //       console.log('############ Video found ######### ');
+  //       uploadDB.addFile(account, type, device, location, thumbfileUrl, fileUrl);
+  //       new_upload_socket.emit('update', { type: "video", path: fileUrl });
+  //     } else if (_.indexOf(audioxtensions, ext) != -1) {
+  //       dstPath = "";
+
+  //       var dstAudioMp3Path = __dirname + '/files/' + base + '.mp3';
+  //       var dbAudioMp3Path = '/files/' + base + '.mp3';
+  //       console.log('############ Audio found ######### ' + fileUrl + " : " + dstAudioMp3Path);
+  //       var proc = new ffmpeg({ source: srcPath })
+  //         .saveToFile(dstAudioMp3Path, function (stdout, stderr) {
+  //           console.log('######## file has been converted succesfully #########' + stdout + " : " + stderr);
+  //           uploadDB.addFile(account, type, device, location, thumbfileUrl, dbAudioMp3Path);
+  //           new_upload_socket.emit('update', { type: "audio", path: dbAudioMp3Path });
+  //         });
+
+  //     }
+
+  //     res.writeHead(200, { 'content-type': 'text/plain' });
+  //     res.write('received fields:\n\n ' + util.inspect(fields));
+  //     res.write('\n\n');
+  //     res.end('received files:\n\n ' + util.inspect(files));
+  //   });
 });
 
 
