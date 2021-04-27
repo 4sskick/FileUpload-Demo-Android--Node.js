@@ -20,7 +20,7 @@
     "mongoose": "5.4.10",
     "node-thumbnail": "0.4.0",
     "snyk": "^1.192.5",
-    "socket.io": "^2.2.0",
+    "socket.io": "^3.0.0",
     "underscore": "1.4.4",
     "video-thumb": "0.0.2"
   },
