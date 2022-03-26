@@ -19,10 +19,10 @@
     "formidable": "1.2.1",
     "mongoose": "5.4.10",
     "node-thumbnail": "0.4.0",
-    "snyk": "^1.192.5",
     "socket.io": "^2.2.0",
     "underscore": "1.4.4",
-    "video-thumb": "0.0.2"
+    "video-thumb": "0.0.2",
+    "@snyk/protect": "latest"
   },
   "devDependencies": {
     "mocha": "0.0.2",
@@ -33,7 +33,7 @@
     "nodepad": "bin/nodepad.js"
   },
   "scripts": {
-    "snyk-protect": "snyk protect",
+    "snyk-protect": "snyk-protect",
     "prepublish": "npm run snyk-protect",
     "start": "nodemon app.js",
     "prepare": "npm run snyk-protect"
